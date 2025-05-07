@@ -76,7 +76,8 @@ def pantalla_partida():
 
 pygame.init()
 
-# definimos el factor por el que se multiplicará la superficie draw_surface al mostrarla en display_surface
+# Definimos el factor inicial de escalado. Se usa para definir el tamaño inicial de la ventana
+# del juego y para multiplicar la superficie draw_surface al mostrarla en display_surface
 scale_factor = get_new_scale_factor(int(pygame.display.Info().current_w * 0.7), int(pygame.display.Info().current_h))
 
 display_surface = pygame.display.set_mode((WORLD_WIDTH * scale_factor, WORLD_HEIGHT * scale_factor),  HWSURFACE | DOUBLEBUF | RESIZABLE)
