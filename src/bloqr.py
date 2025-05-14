@@ -3,8 +3,8 @@ from pygame.locals import *
 
 WORLD_WIDTH = 256
 WORLD_HEIGHT = 256
-BLOCK_WIDTH = 32
-BLOCK_HEIGHT = 24
+COL_WIDTH = 32
+FLOOR_HEIGHT = 24
 
 pyramid = [] # matriz que contiene información sobre todos los bloques del juego
 hero_row = 0
@@ -63,7 +63,7 @@ def draw_block(x, y):
 def draw_pyramid(x, y):
     for floor_number, blocks in enumerate(pyramid):
         for col_number in range(len(blocks)):
-            draw_block(x + BLOCK_WIDTH * col_number + floor_number * BLOCK_WIDTH / 2, y + (6 - floor_number)  * BLOCK_HEIGHT)
+            draw_block(x + COL_WIDTH * col_number + floor_number * COL_WIDTH / 2, y + (6 - floor_number) * FLOOR_HEIGHT)
 
 
 def cell_exists(row, col):
@@ -71,7 +71,7 @@ def cell_exists(row, col):
 
 
 def draw_hero(hero_row, hero_col, x_pyramid, y_pyramid):
-    draw_surface.blit(hero_img, (x_pyramid + block_img_shift_x - 1 + hero_col * BLOCK_WIDTH + hero_row * BLOCK_WIDTH / 2, y_pyramid + block_img_shift_y + 142 - hero_row * BLOCK_HEIGHT))
+    draw_surface.blit(hero_img, (x_pyramid + block_img_shift_x - 1 + hero_col * COL_WIDTH + hero_row * COL_WIDTH / 2, y_pyramid + block_img_shift_y + 142 - hero_row * FLOOR_HEIGHT))
 
 
 def screen_match():
