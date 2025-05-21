@@ -5,9 +5,15 @@ WORLD_WIDTH = 256
 WORLD_HEIGHT = 256
 COL_WIDTH = 32
 FLOOR_HEIGHT = 24
+PYRAMID_ORIGIN_X = 16   # coordenada x de la esquina superior izquierda donde se dibujará la pirámide
+PYRAMID_ORIGIN_Y = 32   # coordenada y de la esquina superior izquierda donde se dibujará la pirámide
+HERO_IMG_SHIFT_X = -97
+HERO_IMG_SHIFT_Y = -161
+BLOCK_IMG_SHIFT_X = -96
+BLOCK_IMG_SHIFT_Y = -160
 
 pyramid = [] # matriz que contiene información sobre todos los bloques del juego
-hero_row = 0
+hero_floor = 0
 hero_col = 0
 
 def mi_error(mensaje):
@@ -23,7 +29,7 @@ def get_new_scale_factor(display_x_resolution, display_y_resolution):
     return new_scale_factor
 
 def init_game():
-    global pyramid, hero_row, hero_col
+    global pyramid, hero_floor, hero_col
     pyramid = []
     floor_columns = 7
     for floor_number in range(7):
@@ -32,8 +38,7 @@ def init_game():
             floor.append(0)
         pyramid.append(floor)
         floor_columns -= 1
-    #print(pyramid)
-    hero_row = 6
+    hero_floor = 6
     hero_col = 0
 
 def screen_menu():
@@ -56,26 +61,36 @@ def screen_menu():
     draw_surface.blit(menu_subtitle_img, ((WORLD_WIDTH - menu_subtitle_img.get_width()) / 2, 150))
 
 
+def coordinates_of_block(floor_number, col_number):
+    x = PYRAMID_ORIGIN_X + COL_WIDTH * col_number + floor_number * COL_WIDTH / 2
+    y = PYRAMID_ORIGIN_Y + (6 - floor_number) * FLOOR_HEIGHT
+    return x, y
+
+
 def draw_block(x, y):
-    draw_surface.blit(block_img, (x + block_img_shift_x, y + block_img_shift_y))
+    draw_surface.blit(block_img, (x + BLOCK_IMG_SHIFT_X, y + BLOCK_IMG_SHIFT_Y))
 
 
-def draw_pyramid(x, y):
+def draw_pyramid():
     for floor_number, blocks in enumerate(pyramid):
         for col_number in range(len(blocks)):
-            draw_block(x + COL_WIDTH * col_number + floor_number * COL_WIDTH / 2, y + (6 - floor_number) * FLOOR_HEIGHT)
+            x_block, y_block = coordinates_of_block(floor_number, col_number)
+            #if floor_number == 6 and col_number == 0:
+            #    print(f"Para floor_number {floor_number} y columna {col_number} -> x={x_block}, y={y_block}")
+            draw_block(x_block, y_block)
 
 
 def cell_exists(row, col):
     return 0 <= row <= 6 and 0 <= col <= 6 - row
 
 
-def draw_hero(hero_row, hero_col, x_pyramid, y_pyramid):
-    draw_surface.blit(hero_img, (x_pyramid + block_img_shift_x - 1 + hero_col * COL_WIDTH + hero_row * COL_WIDTH / 2, y_pyramid + block_img_shift_y + 142 - hero_row * FLOOR_HEIGHT))
+def draw_hero(hero_floor, hero_col):
+    hero_x, hero_y = coordinates_of_block(hero_floor, hero_col)
+    draw_surface.blit(hero_img, (hero_x + HERO_IMG_SHIFT_X, hero_y + HERO_IMG_SHIFT_Y))
 
 
 def screen_match():
-    global scale_factor, hero_row, hero_col
+    global scale_factor, hero_floor, hero_col
 
     for event in pygame.event.get():
         if event.type == QUIT:
@@ -85,27 +100,27 @@ def screen_match():
             new_x_resolution, new_y_resolution = event.dict['size']
             scale_factor = get_new_scale_factor(new_x_resolution, new_y_resolution)
         elif event.type == pygame.KEYDOWN:
-            dest_hero_row = hero_row
+            dest_hero_row = hero_floor
             dest_hero_col = hero_col
             if event.key == K_q:  # Diagonal arriba-izquierda
-                dest_hero_row = hero_row + 1
+                dest_hero_row = hero_floor + 1
                 dest_hero_col = hero_col - 1
             elif event.key == K_w:  # Diagonal arriba-derecha
-                dest_hero_row = hero_row + 1
+                dest_hero_row = hero_floor + 1
                 dest_hero_col = hero_col
             elif event.key == K_a:  # Diagonal abajo-izquierda
-                dest_hero_row = hero_row - 1
+                dest_hero_row = hero_floor - 1
                 dest_hero_col = hero_col
             elif event.key == K_s:    # Diagonal abajo-derecha
-                dest_hero_row = hero_row - 1
+                dest_hero_row = hero_floor - 1
                 dest_hero_col = hero_col + 1
             if cell_exists(dest_hero_row, dest_hero_col):
-                hero_row = dest_hero_row
+                hero_floor = dest_hero_row
                 hero_col = dest_hero_col
 
     draw_surface.fill((0, 0, 0))
-    draw_pyramid(16, 32)
-    draw_hero(hero_row, hero_col, 16, 32)
+    draw_pyramid()
+    draw_hero(hero_floor, hero_col)
 
 
 pygame.init()
@@ -123,11 +138,8 @@ font_paragraph = pygame.font.Font("assets/arcade_i.ttf", 11)
 menu_title_img = font_title.render("bloqr", False, (0, 255, 0))
 menu_subtitle_img = font_paragraph.render("press space to start", False, (0, 255, 0))
 block_img = pygame.image.load('assets/block_0001.png')
-block_img_shift_x = -96
-block_img_shift_y = -160
+
 hero_img = pygame.image.load('assets/hero.png')
-hero_img_shift_x = -98
-hero_img_shift_y = -144
 screen = "menu"
 while True:  # main game loop
     if screen == "menu":
