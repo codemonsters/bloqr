@@ -91,13 +91,13 @@ def draw_hero(hero):
         inc_y = (frame_counter - hero["state_init_counter"]) * (hero_dest_y - hero_y) / FRAMES_JUMPING
         curve_y_inc = (1 - (1/(FRAMES_JUMPING / 2)) * fabs( frame_counter - hero["state_init_counter"] - 3)) * JUMP_HEIGHT
         if hero["facing"] == "up_right":
-            img = img_hero_up_right_jumping
+            img = img_hero_jumping_up_right
         elif hero["facing"] == "up_left":
-            img = img_hero_up_left_jumping
+            img = img_hero_jumping_up_left
         elif hero["facing"] == "down_right":
-            img = img_hero_down_right_jumping
+            img = img_hero_jumping_down_right
         elif hero["facing"] == "down_left":
-            img = img_hero_down_left_jumping
+            img = img_hero_jumping_down_left
         else:
             mi_error("El héroe está mirando en una dirección inválida")
     else:
@@ -105,13 +105,13 @@ def draw_hero(hero):
         inc_y = 0
         curve_y_inc = 0
         if hero["facing"] == "up_right":
-            img = img_hero_up_right_idle
+            img = img_hero_idle_up_right
         elif hero["facing"] == "up_left":
-            img = img_hero_up_left_idle
+            img = img_hero_idle_up_left
         elif hero["facing"] == "down_right":
-            img = img_hero_down_right_idle
+            img = img_hero_idle_down_right
         elif hero["facing"] == "down_left":
-            img = img_hero_down_left_idle
+            img = img_hero_idle_down_left
         else:
             mi_error("El héroe está mirando en una dirección inválida")
     draw_surface.blit(img, (hero_x + HERO_IMG_SHIFT_X + inc_x, hero_y + HERO_IMG_SHIFT_Y + inc_y - curve_y_inc))
@@ -181,20 +181,20 @@ font_paragraph = pygame.font.Font("assets/arcade_i.ttf", 11)
 img_menu_title = font_title.render("bloqr", False, (0, 255, 0))
 img_menu_subtitle = font_paragraph.render("press space to start", False, (0, 255, 0))
 img_block = pygame.image.load('assets/block_0001.png')
-img_hero_up_right_idle = pygame.image.load('assets/hero_down_right_idle.png')
-img_hero_up_right_jumping = pygame.image.load('assets/hero_down_right_jumping.png')
-img_hero_up_left_idle = pygame.image.load('assets/hero_down_right_idle.png')
-img_hero_up_left_jumping = pygame.image.load('assets/hero_down_right_jumping.png')
-img_hero_down_right_idle = pygame.image.load('assets/hero_down_right_idle.png')
-img_hero_down_right_jumping = pygame.image.load('assets/hero_down_right_jumping.png')
-img_hero_down_left_idle = pygame.image.load('assets/hero_down_right_idle.png')
-img_hero_down_left_jumping = pygame.image.load('assets/hero_down_right_jumping.png')
+img_hero_idle_down_right = pygame.image.load('assets/hero_idle_down_right.png')
+img_hero_idle_down_left = pygame.image.load('assets/hero_idle_down_left.png')
+img_hero_idle_up_right = pygame.image.load('assets/hero_idle_up_right.png')
+img_hero_idle_up_left = pygame.image.load('assets/hero_idle_up_left.png')
+img_hero_jumping_down_right = pygame.image.load('assets/hero_jumping_down_right.png')
+img_hero_jumping_down_left = pygame.image.load('assets/hero_jumping_down_left.png')
+img_hero_jumping_up_right = pygame.image.load('assets/hero_jumping_up_right.png')
+img_hero_jumping_up_left = pygame.image.load('assets/hero_jumping_up_left.png')
 
 hero = {
     "floor": 0,         # piso en el que se encuentra el héroe
     "col": 0,           # columna en la que se encuentra el héroe
     "state": "idle",    # estado en el que se encuentra el héroe ("idle", "jumping"...)
-    "img": img_hero_down_right_idle,
+    "img": img_hero_idle_down_right,
 }
 
 pyramid = []    # matriz que contiene información sobre todos los bloques del juego
