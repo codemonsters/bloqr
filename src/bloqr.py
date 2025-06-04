@@ -37,7 +37,7 @@ def init_game():
     for floor_number in range(7):
         floor = []
         for column in range(floor_columns):
-            floor.append(1)
+            floor.append(2)
         pyramid.append(floor)
         floor_columns -= 1
 
@@ -73,15 +73,15 @@ def coordinates_of_block(floor_number, col_number):
     return x, y
 
 
-def draw_block(x, y):
-    draw_surface.blit(img_block, (x + BLOCK_IMG_SHIFT_X, y + BLOCK_IMG_SHIFT_Y))
+def draw_block(level, x, y):
+    draw_surface.blit(imgs_block[level], (x + BLOCK_IMG_SHIFT_X, y + BLOCK_IMG_SHIFT_Y))
 
 
 def draw_pyramid():
     for floor_number, blocks in enumerate(pyramid):
         for col_number in range(len(blocks)):
             x_block, y_block = coordinates_of_block(floor_number, col_number)
-            draw_block(x_block, y_block)
+            draw_block(pyramid[floor_number][col_number], x_block, y_block)
 
 
 def cell_exists(floor, col):
@@ -165,6 +165,8 @@ def screen_match():
             hero["col"] = hero["dest_col"]
             if cell_exists(hero["floor"], hero["col"]):
                 hero["state"] = "idle"
+                if pyramid[hero["floor"]][hero["col"]] > 0:
+                    pyramid[hero["floor"]][hero["col"]] -= 1
             else:
                 # el héroe se ha caido del mapa
                 playing = False
@@ -206,7 +208,12 @@ font_paragraph = pygame.font.Font("assets/arcade_i.ttf", 11)
 img_menu_title = font_title.render("bloqr", False, (0, 255, 0))
 img_menu_subtitle = font_paragraph.render("press space to start", False, (0, 255, 0))
 img_game_over = font_paragraph.render("game over", False, (0, 255, 0))
-img_block = pygame.image.load('assets/block_0001.png')
+imgs_block = [
+    pygame.image.load('assets/block_0.png'),
+    pygame.image.load('assets/block_1.png'),
+    pygame.image.load('assets/block_2.png')
+]
+
 img_hero_idle_down_right = pygame.image.load('assets/hero_idle_down_right.png')
 img_hero_idle_down_left = pygame.image.load('assets/hero_idle_down_left.png')
 img_hero_idle_up_right = pygame.image.load('assets/hero_idle_up_right.png')
