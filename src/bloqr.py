@@ -10,6 +10,7 @@ PYRAMID_ORIGIN_X = 16   # coordenada x de la esquina superior izquierda donde se
 PYRAMID_ORIGIN_Y = 32   # coordenada y de la esquina superior izquierda donde se dibujará la pirámide
 HERO_IMG_SHIFT_X = -97
 HERO_IMG_SHIFT_Y = -161
+HERO_FALLING_SPEED = 7
 BLOCK_IMG_SHIFT_X = -96
 BLOCK_IMG_SHIFT_Y = -160
 FRAMES_JUMPING = 6
@@ -28,19 +29,23 @@ def get_new_scale_factor(display_x_resolution, display_y_resolution):
     return new_scale_factor
 
 def init_game():
-    global pyramid, hero
+    global hero, playing, pyramid
+    playing = True
+
     pyramid = []
     floor_columns = 7
     for floor_number in range(7):
         floor = []
         for column in range(floor_columns):
-            floor.append(0)
+            floor.append(1)
         pyramid.append(floor)
         floor_columns -= 1
+
     hero["floor"] = 6
     hero["col"] = 0
     hero["state"] = "idle"
     hero["facing"] = "down_right"
+    hero["falling_y_dist"] = 0
 
 def screen_menu():
     global screen, scale_factor
@@ -114,11 +119,11 @@ def draw_hero(hero):
             img = img_hero_idle_down_left
         else:
             mi_error("El héroe está mirando en una dirección inválida")
-    draw_surface.blit(img, (hero_x + HERO_IMG_SHIFT_X + inc_x, hero_y + HERO_IMG_SHIFT_Y + inc_y - curve_y_inc))
+    draw_surface.blit(img, (hero_x + HERO_IMG_SHIFT_X + inc_x, hero_y + HERO_IMG_SHIFT_Y + inc_y - curve_y_inc + hero["falling_y_dist"]))
 
 
 def screen_match():
-    global scale_factor, hero
+    global hero, playing, scale_factor, screen
 
     for event in pygame.event.get():
         if event.type == QUIT:
@@ -127,7 +132,7 @@ def screen_match():
         elif event.type == VIDEORESIZE:
             new_x_resolution, new_y_resolution = event.dict['size']
             scale_factor = get_new_scale_factor(new_x_resolution, new_y_resolution)
-        elif event.type == pygame.KEYDOWN:
+        elif playing and event.type == pygame.KEYDOWN:
             dest_hero_floor = hero["floor"]
             dest_hero_col = hero["col"]
             dest_facing = hero["facing"]
@@ -147,7 +152,7 @@ def screen_match():
                 dest_hero_floor = hero["floor"] - 1
                 dest_hero_col = hero["col"] + 1
                 dest_facing = "down_right"
-            if (hero["floor"] != dest_hero_floor or hero["col"] != dest_hero_col) and cell_exists(dest_hero_floor, dest_hero_col):
+            if hero["floor"] != dest_hero_floor or hero["col"] != dest_hero_col:
                 hero["dest_floor"] = dest_hero_floor
                 hero["dest_col"] = dest_hero_col
                 hero["state"] = "jumping"
@@ -158,11 +163,31 @@ def screen_match():
         if frame_counter - hero["state_init_counter"] > FRAMES_JUMPING:
             hero["floor"] = hero["dest_floor"]
             hero["col"] = hero["dest_col"]
-            hero["state"] = "idle"
+            if cell_exists(hero["floor"], hero["col"]):
+                hero["state"] = "idle"
+            else:
+                # el héroe se ha caido del mapa
+                playing = False
+                hero["death_timestamp"] = frame_counter
+                hero["state"] = "falling"
+    elif hero["state"] == "falling":
+        hero["falling_y_dist"] += HERO_FALLING_SPEED
 
+    if not playing:
+        if frame_counter >= hero["death_timestamp"] + 60:
+            screen = "menu"
+
+    # componemos el frame
     draw_surface.fill((0, 0, 0))
-    draw_pyramid()
-    draw_hero(hero)
+    if hero["state"] == "falling" and hero["floor"] > 0:
+        draw_hero(hero)
+        draw_pyramid()
+    else:
+        draw_pyramid()
+        draw_hero(hero)
+
+    if not playing:
+        draw_surface.blit(img_game_over, ((WORLD_WIDTH - img_game_over.get_width()) / 2, 20))
 
 
 pygame.init()
@@ -180,6 +205,7 @@ font_paragraph = pygame.font.Font("assets/arcade_i.ttf", 11)
 
 img_menu_title = font_title.render("bloqr", False, (0, 255, 0))
 img_menu_subtitle = font_paragraph.render("press space to start", False, (0, 255, 0))
+img_game_over = font_paragraph.render("game over", False, (0, 255, 0))
 img_block = pygame.image.load('assets/block_0001.png')
 img_hero_idle_down_right = pygame.image.load('assets/hero_idle_down_right.png')
 img_hero_idle_down_left = pygame.image.load('assets/hero_idle_down_left.png')
@@ -197,6 +223,7 @@ hero = {
     "img": img_hero_idle_down_right,
 }
 
+playing = False # flag que es True mientras permitimos que el jugador juegue
 pyramid = []    # matriz que contiene información sobre todos los bloques del juego
 
 frame_counter = 0
